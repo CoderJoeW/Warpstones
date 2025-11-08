@@ -93,9 +93,7 @@ public class Warpstones extends JavaPlugin implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         BlockState state = event.getBlock().getState();
 
-        if (state instanceof Sign) {
-            Sign sign = (Sign) state;
-
+        if (state instanceof Sign sign) {
             WarpstoneSign warpstoneSign = new WarpstoneSign(sign);
 
             if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name, warpstoneSign.id)) {
