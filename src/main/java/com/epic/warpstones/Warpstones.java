@@ -1,6 +1,7 @@
 package com.epic.warpstones;
 
 import com.epic.warpstones.models.Warpstone;
+import com.epic.warpstones.models.WarpstoneSign;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -94,22 +95,20 @@ public class Warpstones extends JavaPlugin implements Listener {
 
         if (state instanceof Sign) {
             Sign sign = (Sign) state;
-            String titleLine = ((TextComponent)sign.lines().getFirst()).content();
-            String nameLine = ((TextComponent)sign.lines().get(1)).content();
-            String idLine = ((TextComponent)sign.lines().get(2)).content().split(" ")[1];
-            int id = Integer.parseInt(idLine);
 
-            if (!titleLine.equals(WARPSTONE_IDENTIFIER) || !this.warpstoneExists(nameLine, id)) {
+            WarpstoneSign warpstoneSign = new WarpstoneSign(sign);
+
+            if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name, warpstoneSign.id)) {
                 return;
             }
 
-            Warpstone ws = this.findWarpstone(nameLine, id);
+            Warpstone ws = this.findWarpstone(warpstoneSign.name, warpstoneSign.id);
 
             this.warpstonesList.remove(ws);
 
             event.getPlayer().sendMessage("Warpstone removed");
 
-            Warpstone linkedWarpstone = this.findWarpstone(nameLine);
+            Warpstone linkedWarpstone = this.findWarpstone(warpstoneSign.name);
 
             if (linkedWarpstone != null) {
                 BlockState blockState = event.getBlock().getWorld().getBlockAt(linkedWarpstone.x,  linkedWarpstone.y, linkedWarpstone.z).getState();
@@ -135,18 +134,15 @@ public class Warpstones extends JavaPlugin implements Listener {
         }
 
         if (block.getState() instanceof Sign sign) {
-            String titleLine = ((TextComponent)sign.lines().getFirst()).content();
-            String nameLine = ((TextComponent)sign.lines().get(1)).content();
-            String idLine = ((TextComponent)sign.lines().get(2)).content().split(" ")[1];
-            int id = Integer.parseInt(idLine);
+            WarpstoneSign warpstoneSign = new WarpstoneSign(sign);
 
-            if (!titleLine.equals(WARPSTONE_IDENTIFIER) || !this.warpstoneExists(nameLine, id)) {
+            if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name, warpstoneSign.id)) {
                 return;
             }
 
             event.setCancelled(true);
 
-            Warpstone linkedWarpstone = this.findWarpstone(nameLine, (id == 1) ? 2 : 1);
+            Warpstone linkedWarpstone = this.findWarpstone(warpstoneSign.name, (warpstoneSign.id == 1) ? 2 : 1);
             Location location = new Location(event.getPlayer().getWorld(), linkedWarpstone.x, linkedWarpstone.y, linkedWarpstone.z);
             event.getPlayer().teleportAsync(location);
         }
