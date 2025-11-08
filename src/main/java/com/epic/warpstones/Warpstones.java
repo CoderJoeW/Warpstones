@@ -5,6 +5,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
@@ -12,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -115,6 +118,30 @@ public class Warpstones extends JavaPlugin implements Listener {
                     linkedSign.update();
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Block block = event.getClickedBlock();
+
+        if (block == null) {
+            return;
+        }
+
+        if (block.getState() instanceof Sign sign) {
+            String titleLine = ((TextComponent)sign.lines().getFirst()).content();
+            String nameLine = ((TextComponent)sign.lines().get(1)).content();
+            String idLine = ((TextComponent)sign.lines().get(2)).content().split(" ")[1];
+            int id = Integer.parseInt(idLine);
+
+            if (!titleLine.equals(WARPSTONE_IDENTIFIER) || !this.warpstoneExists(nameLine, id)) {
+                return;
+            }
+
+            Warpstone linkedWarpstone = this.findWarpstone(nameLine, (id == 1) ? 2 : 1);
+            Location location = new Location(event.getPlayer().getWorld(), linkedWarpstone.x, linkedWarpstone.y, linkedWarpstone.z);
+            event.getPlayer().teleportAsync(location);
         }
     }
 
