@@ -12,6 +12,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -123,6 +124,10 @@ public class Warpstones extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+
         Block block = event.getClickedBlock();
 
         if (block == null) {
@@ -138,6 +143,8 @@ public class Warpstones extends JavaPlugin implements Listener {
             if (!titleLine.equals(WARPSTONE_IDENTIFIER) || !this.warpstoneExists(nameLine, id)) {
                 return;
             }
+
+            event.setCancelled(true);
 
             Warpstone linkedWarpstone = this.findWarpstone(nameLine, (id == 1) ? 2 : 1);
             Location location = new Location(event.getPlayer().getWorld(), linkedWarpstone.x, linkedWarpstone.y, linkedWarpstone.z);
