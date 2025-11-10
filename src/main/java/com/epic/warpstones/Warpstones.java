@@ -54,32 +54,30 @@ public class Warpstones extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onSignChange(SignChangeEvent event) {
-        List<Component> lines = event.lines();
-        String titleLine = ((TextComponent)lines.getFirst()).content();
-        String nameLine = ((TextComponent)lines.get(1)).content();
+        WarpstoneSign warpstoneSign = new WarpstoneSign(event.lines());
 
-        if (titleLine.equals(WARPSTONE_IDENTIFIER)) {
-            if (nameLine.isEmpty()) {
+        if (warpstoneSign.title.equals(WARPSTONE_IDENTIFIER)) {
+            if (warpstoneSign.name.isEmpty()) {
                 event.getPlayer().sendMessage("Warpstones require a name for linking on the second line");
                 return;
             }
 
-            if (this.warpstoneIsAlreadyLinked(nameLine)) {
+            if (this.warpstoneIsAlreadyLinked(warpstoneSign.name)) {
                 event.getPlayer().sendMessage("That name has already 2 warpstones linked");
                 return;
             }
 
             Warpstone newWarpstone = new Warpstone();
 
-            if (this.warpstoneExists(nameLine)) {
-                Warpstone warpstone = this.findWarpstone(nameLine);
+            if (this.warpstoneExists(warpstoneSign.name)) {
+                Warpstone warpstone = this.findWarpstone(warpstoneSign.name);
                 newWarpstone.id = (warpstone.id == 1) ? 2 : 1;
             } else {
                 newWarpstone.id = 1;
                 event.line(3, WARPSTONE_NOT_LINKED_TEXT);
             }
 
-            newWarpstone.name = nameLine;
+            newWarpstone.name = warpstoneSign.name;
             newWarpstone.x = event.getBlock().getX();
             newWarpstone.y = event.getBlock().getY();
             newWarpstone.z = event.getBlock().getZ();
@@ -88,10 +86,10 @@ public class Warpstones extends JavaPlugin implements Listener {
 
             event.setLine(2, "ID: " + newWarpstone.id);
 
-            if (this.warpstoneIsAlreadyLinked(nameLine)) {
+            if (this.warpstoneIsAlreadyLinked(warpstoneSign.name)) {
                 event.line(3, WARPSTONE_LINKED_TEXT);
 
-                Warpstone linkedWarpstone = this.findWarpstone(nameLine, (newWarpstone.id == 1) ? 2 : 1);
+                Warpstone linkedWarpstone = this.findWarpstone(warpstoneSign.name, (newWarpstone.id == 1) ? 2 : 1);
                 BlockState state = event.getBlock().getWorld().getBlockAt(linkedWarpstone.x,  linkedWarpstone.y, linkedWarpstone.z).getState();
 
                 if (state instanceof Sign sign) {
