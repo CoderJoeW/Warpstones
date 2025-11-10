@@ -158,6 +158,12 @@ public class Warpstones extends JavaPlugin implements Listener {
             event.setCancelled(true);
 
             Warpstone linkedWarpstone = this.findWarpstone(warpstoneSign.name, (warpstoneSign.id == 1) ? 2 : 1);
+
+            if (linkedWarpstone == null) {
+                event.getPlayer().sendMessage("Warpstone is not linked!");
+                return;
+            }
+
             Location location = new Location(event.getPlayer().getWorld(), linkedWarpstone.x, linkedWarpstone.y, linkedWarpstone.z);
             event.getPlayer().teleportAsync(location);
         }
