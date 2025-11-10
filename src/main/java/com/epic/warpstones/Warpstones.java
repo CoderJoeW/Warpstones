@@ -53,17 +53,6 @@ public class Warpstones extends JavaPlugin implements Listener {
         }
     }
 
-    @Override
-    public void onDisable() {
-        if (this.warpstoneStorage instanceof SqliteStorage) {
-            try {
-                ((SqliteStorage) this.warpstoneStorage).closeConnection();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
     @EventHandler
     public void onSignChange(SignChangeEvent event) {
         List<Component> lines = event.lines();
