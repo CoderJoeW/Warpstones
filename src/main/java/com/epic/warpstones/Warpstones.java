@@ -69,28 +69,26 @@ public class Warpstones extends JavaPlugin implements Listener {
                 return;
             }
 
-            int warpstoneId = 1;
+            Warpstone newWarpstone = new Warpstone();
 
             if (this.warpstoneExists(nameLine)) {
                 Warpstone warpstone = this.findWarpstone(nameLine);
-                warpstoneId = (warpstone.id == 1) ? 2 : 1;
+                newWarpstone.id = (warpstone.id == 1) ? 2 : 1;
             }
 
-            Warpstone newWarpstone = new Warpstone();
             newWarpstone.name = nameLine;
-            newWarpstone.id = warpstoneId;
             newWarpstone.x = event.getBlock().getX();
             newWarpstone.y = event.getBlock().getY();
             newWarpstone.z = event.getBlock().getZ();
 
             this.warpstonesList.add(newWarpstone);
 
-            event.setLine(2, "ID: " + warpstoneId);
+            event.setLine(2, "ID: " + newWarpstone.id);
 
             if (this.warpstoneIsAlreadyLinked(nameLine)) {
                 event.line(3, WARPSTONE_LINKED_TEXT);
 
-                Warpstone linkedWarpstone = this.findWarpstone(nameLine, (warpstoneId == 1) ? 2 : 1);
+                Warpstone linkedWarpstone = this.findWarpstone(nameLine, (newWarpstone.id == 1) ? 2 : 1);
                 BlockState state = event.getBlock().getWorld().getBlockAt(linkedWarpstone.x,  linkedWarpstone.y, linkedWarpstone.z).getState();
 
                 if (state instanceof Sign sign) {
