@@ -56,52 +56,54 @@ public class Warpstones extends JavaPlugin implements Listener {
     public void onSignChange(SignChangeEvent event) {
         WarpstoneSign warpstoneSign = new WarpstoneSign(event.lines());
 
-        if (warpstoneSign.title.equals(WARPSTONE_IDENTIFIER)) {
-            if (warpstoneSign.name.isEmpty()) {
-                event.getPlayer().sendMessage("Warpstones require a name for linking on the second line");
-                return;
-            }
-
-            if (this.warpstoneIsAlreadyLinked(warpstoneSign.name)) {
-                event.getPlayer().sendMessage("That name has already 2 warpstones linked");
-                return;
-            }
-
-            Warpstone newWarpstone = new Warpstone();
-
-            if (this.warpstoneExists(warpstoneSign.name)) {
-                Warpstone warpstone = this.findWarpstone(warpstoneSign.name);
-                newWarpstone.id = (warpstone.id == 1) ? 2 : 1;
-            } else {
-                newWarpstone.id = 1;
-                event.line(3, WARPSTONE_NOT_LINKED_TEXT);
-            }
-
-            newWarpstone.name = warpstoneSign.name;
-            newWarpstone.x = event.getBlock().getX();
-            newWarpstone.y = event.getBlock().getY();
-            newWarpstone.z = event.getBlock().getZ();
-
-            this.warpstonesList.add(newWarpstone);
-
-            event.setLine(2, "ID: " + newWarpstone.id);
-
-            if (this.warpstoneIsAlreadyLinked(warpstoneSign.name)) {
-                event.line(3, WARPSTONE_LINKED_TEXT);
-
-                Warpstone linkedWarpstone = this.findWarpstone(warpstoneSign.name, (newWarpstone.id == 1) ? 2 : 1);
-                BlockState state = event.getBlock().getWorld().getBlockAt(linkedWarpstone.x,  linkedWarpstone.y, linkedWarpstone.z).getState();
-
-                if (state instanceof Sign sign) {
-                    sign.getSide(Side.FRONT).line(3, WARPSTONE_LINKED_TEXT);
-                    sign.update();
-                }
-            }
-
-            event.getPlayer().sendMessage("Warpstone added");
-
-            this.warpstoneStorage.saveWarpstones(this.warpstonesList);
+        if (!warpstoneSign.title.equals(WARPSTONE_IDENTIFIER)) {
+            return;
         }
+
+        if (warpstoneSign.name.isEmpty()) {
+            event.getPlayer().sendMessage("Warpstones require a name for linking on the second line");
+            return;
+        }
+
+        if (this.warpstoneIsAlreadyLinked(warpstoneSign.name)) {
+            event.getPlayer().sendMessage("That name has already 2 warpstones linked");
+            return;
+        }
+
+        Warpstone newWarpstone = new Warpstone();
+
+        if (this.warpstoneExists(warpstoneSign.name)) {
+            Warpstone warpstone = this.findWarpstone(warpstoneSign.name);
+            newWarpstone.id = (warpstone.id == 1) ? 2 : 1;
+        } else {
+            newWarpstone.id = 1;
+            event.line(3, WARPSTONE_NOT_LINKED_TEXT);
+        }
+
+        newWarpstone.name = warpstoneSign.name;
+        newWarpstone.x = event.getBlock().getX();
+        newWarpstone.y = event.getBlock().getY();
+        newWarpstone.z = event.getBlock().getZ();
+
+        this.warpstonesList.add(newWarpstone);
+
+        event.setLine(2, "ID: " + newWarpstone.id);
+
+        if (this.warpstoneIsAlreadyLinked(warpstoneSign.name)) {
+            event.line(3, WARPSTONE_LINKED_TEXT);
+
+            Warpstone linkedWarpstone = this.findWarpstone(warpstoneSign.name, (newWarpstone.id == 1) ? 2 : 1);
+            BlockState state = event.getBlock().getWorld().getBlockAt(linkedWarpstone.x,  linkedWarpstone.y, linkedWarpstone.z).getState();
+
+            if (state instanceof Sign sign) {
+                sign.getSide(Side.FRONT).line(3, WARPSTONE_LINKED_TEXT);
+                sign.update();
+            }
+        }
+
+        event.getPlayer().sendMessage("Warpstone added");
+
+        this.warpstoneStorage.saveWarpstones(this.warpstonesList);
     }
 
     @EventHandler
