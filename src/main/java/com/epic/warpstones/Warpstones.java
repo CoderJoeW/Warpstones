@@ -75,6 +75,7 @@ public class Warpstones extends JavaPlugin implements Listener {
                 Warpstone warpstone = this.findWarpstone(nameLine);
                 newWarpstone.id = (warpstone.id == 1) ? 2 : 1;
             } else {
+                newWarpstone.id = 1;
                 event.line(3, WARPSTONE_NOT_LINKED_TEXT);
             }
 
