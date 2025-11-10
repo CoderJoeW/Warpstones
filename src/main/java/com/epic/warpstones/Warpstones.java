@@ -1,7 +1,10 @@
 package com.epic.warpstones;
 
+import com.epic.warpstones.interfaces.WarpstoneStorage;
 import com.epic.warpstones.models.Warpstone;
 import com.epic.warpstones.models.WarpstoneSign;
+import com.epic.warpstones.storage.FileStorage;
+import com.epic.warpstones.storage.SqliteStorage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -19,11 +22,15 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Warpstones extends JavaPlugin implements Listener {
     public List<Warpstone> warpstonesList = new ArrayList<>();
+    public WarpstoneStorage warpstoneStorage;
 
     public final String WARPSTONE_IDENTIFIER = "Warpstone";
     public final Component WARPSTONE_LINKED_TEXT = Component
@@ -36,6 +43,25 @@ public class Warpstones extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this,this);
+
+        try {
+            warpstoneStorage = new FileStorage();
+
+            warpstonesList = warpstoneStorage.loadWarpstones();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        if (this.warpstoneStorage instanceof SqliteStorage) {
+            try {
+                ((SqliteStorage) this.warpstoneStorage).closeConnection();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @EventHandler
@@ -86,6 +112,8 @@ public class Warpstones extends JavaPlugin implements Listener {
             }
 
             event.getPlayer().sendMessage("Warpstone added");
+
+            this.warpstoneStorage.saveWarpstones(this.warpstonesList);
         }
     }
 
