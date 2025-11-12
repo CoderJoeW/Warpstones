@@ -49,7 +49,7 @@ public class FileStorage implements WarpstoneStorage {
                 warpstone.y = Integer.parseInt(parts[1]);
                 warpstone.z = Integer.parseInt(parts[2]);
                 warpstone.name = parts[3];
-                warpstone.id = Integer.parseInt(parts[4]);
+                warpstone.destination = parts[4];
                 warpstones.add(warpstone);
             }
         } catch (IOException e) {
@@ -75,7 +75,7 @@ public class FileStorage implements WarpstoneStorage {
                         .append("|")
                         .append(warpstone.name)
                         .append("|")
-                        .append(warpstone.id);
+                        .append(warpstone.destination);
 
                 if (i + 1 != warpstones.size()) {
                     builder.append("\n");
