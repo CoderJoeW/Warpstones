@@ -8,5 +8,5 @@ public class Warpstone {
     public int z;
 
     public String name;
-    public int id;
+    public String destination;
 }
