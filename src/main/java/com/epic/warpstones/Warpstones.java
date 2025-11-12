@@ -3,14 +3,12 @@ package com.epic.warpstones;
 import com.epic.warpstones.interfaces.WarpstoneStorage;
 import com.epic.warpstones.models.Warpstone;
 import com.epic.warpstones.models.WarpstoneSign;
+import com.epic.warpstones.recipes.WarpstoneGuideBook;
 import com.epic.warpstones.storage.FileStorage;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -21,14 +19,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,15 +37,11 @@ public class Warpstones extends JavaPlugin implements Listener {
             .text("Not Linked")
             .color(TextColor.color(255, 0, 0));
 
-    private NamespacedKey recipeKey;
-
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this,this);
 
-        this.recipeKey = new NamespacedKey(this, "warpstones_book_recipe");
-
-        registerCustomBookRecipe();
+        new WarpstoneGuideBook(this);
 
         try {
             warpstoneStorage = new FileStorage();
@@ -183,65 +172,6 @@ public class Warpstones extends JavaPlugin implements Listener {
             Location location = new Location(event.getPlayer().getWorld(), linkedWarpstone.x, linkedWarpstone.y, linkedWarpstone.z);
             event.getPlayer().teleportAsync(location);
         }
-    }
-
-    private void registerCustomBookRecipe() {
-        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta meta = (BookMeta) book.getItemMeta();
-
-        meta.setTitle("Warpstone Book");
-        meta.setAuthor("Epic");
-        meta.setLore(List.of("Instructions on how to create warpstones!"));
-
-        String page1 =
-                "§lWarpstone Guide§r\n" +
-                        "§8--------------------§r\n" +
-                        "\n" +
-                        "Create warpstones with signs.\n" +
-                        "Follow this format:\n" +
-                        "\n" +
-                        "§nLine 1§r: \"Warpstone\"\n" +
-                        "§nLine 2§r: §oYour Warpstone Name§r\n" +
-                        "§nLine 3§r: §oDestination Name§r\n" +
-                        "§nLine 4§r: Status (auto)\n";
-
-        String page2 =
-                "§lDetails§r\n" +
-                        "§8--------------§r\n" +
-                        "\n" +
-                        "Line 2 = this warpstone’s\n" +
-                        "name. Used by other signs\n" +
-                        "to link. Keep it unique.\n" +
-                        "\n" +
-                        "Line 3 = where to travel.\n" +
-                        "Must exactly match that\n" +
-                        "warpstone’s Line 2.\n" +
-                        "\n" +
-                        "Example:\n" +
-                        "  L2: §oTownSquare§r\n" +
-                        "  L3: §oMineEntrance§r\n";
-
-        String page3 =
-                "§lStatus§r\n" +
-                        "§8--------§r\n" +
-                        "\n" +
-                        "Line 4 shows:\n" +
-                        "  • §aLinked§r — names match\n" +
-                        "  • §cNot Linked§r — mismatch\n" +
-                        "\n" +
-                        "Quick checks:\n" +
-                        "• Spelling & case match\n" +
-                        "• No extra spaces\n" +
-                        "• Keep names short\n";
-
-        meta.addPage(page1, page2, page3);
-        book.setItemMeta(meta);
-
-        ShapedRecipe recipe = new ShapedRecipe(this.recipeKey, book);
-        recipe.shape("PPP", "PPP", "PPP");
-        recipe.setIngredient('P', Material.PAPER);
-
-        Bukkit.addRecipe(recipe);
     }
 
     private List<Warpstone> findLinkedWarpstones(String name) {
