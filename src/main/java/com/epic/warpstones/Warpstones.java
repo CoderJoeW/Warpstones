@@ -9,6 +9,8 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -19,6 +21,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -39,9 +44,15 @@ public class Warpstones extends JavaPlugin implements Listener {
             .text("Not Linked")
             .color(TextColor.color(255, 0, 0));
 
+    private NamespacedKey recipeKey;
+
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this,this);
+
+        this.recipeKey = new NamespacedKey(this, "warpstones_book_recipe");
+
+        registerCustomBookRecipe();
 
         try {
             warpstoneStorage = new FileStorage();
@@ -167,6 +178,35 @@ public class Warpstones extends JavaPlugin implements Listener {
             Location location = new Location(event.getPlayer().getWorld(), linkedWarpstone.x, linkedWarpstone.y, linkedWarpstone.z);
             event.getPlayer().teleportAsync(location);
         }
+    }
+
+    private void registerCustomBookRecipe() {
+        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+        BookMeta meta = (BookMeta) book.getItemMeta();
+
+        meta.setTitle("Warpstone Book");
+        meta.setAuthor("Epic");
+        meta.setLore(List.of("Instructions on how to create warpstones!"));
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Warpstone Guide Book: \n")
+                .append("Warpstones are created using special wording on signs\n")
+                .append("The first line of the warpstone must have \"Warpstone\"")
+                .append("The second line of the warpstone can be any name.")
+                .append("Keep in mind that this name is how you will link it to other warpstones\n")
+                .append("The third line of the sign will be the name of warpstone you wish to travel to.\n\n")
+                .append("Once a warpstone has been linked it will show green text \"Linked\" on the 4th row")
+                .append("Otherwise it will show red text \"Not Linked\"");
+
+        meta.addPage(builder.toString());
+
+        book.setItemMeta(meta);
+
+        ShapedRecipe recipe = new ShapedRecipe(this.recipeKey, book);
+        recipe.shape("PPP", "PPP", "PPP");
+        recipe.setIngredient('P', Material.PAPER);
+
+        Bukkit.addRecipe(recipe);
     }
 
     private Warpstone findWarpstone(String name) {
