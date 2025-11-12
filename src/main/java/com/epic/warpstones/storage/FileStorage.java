@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class FileStorage implements WarpstoneStorage {
     private JavaPlugin plugin;
@@ -50,6 +51,7 @@ public class FileStorage implements WarpstoneStorage {
                 warpstone.z = Integer.parseInt(parts[2]);
                 warpstone.name = parts[3];
                 warpstone.destination = parts[4];
+                warpstone.owner = UUID.fromString(parts[5]);
                 warpstones.add(warpstone);
             }
         } catch (IOException e) {
@@ -75,7 +77,9 @@ public class FileStorage implements WarpstoneStorage {
                         .append("|")
                         .append(warpstone.name)
                         .append("|")
-                        .append(warpstone.destination);
+                        .append(warpstone.destination)
+                        .append("|")
+                        .append(warpstone.owner.toString());
 
                 if (i + 1 != warpstones.size()) {
                     builder.append("\n");
