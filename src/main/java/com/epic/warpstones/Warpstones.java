@@ -24,6 +24,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Warpstones extends JavaPlugin implements Listener {
     public List<Warpstone> warpstonesList = new ArrayList<>();
@@ -72,7 +73,7 @@ public class Warpstones extends JavaPlugin implements Listener {
             return;
         }
 
-        if (this.findWarpstone(warpstoneSign.name) != null) {
+        if (this.findWarpstone(warpstoneSign.name, event.getPlayer().getUniqueId()) != null) {
             event.getPlayer().sendMessage("Warpstone with name " + warpstoneSign.name + " already exists");
             event.setCancelled(true);
             return;
@@ -80,8 +81,8 @@ public class Warpstones extends JavaPlugin implements Listener {
 
         Warpstone newWarpstone = new Warpstone();
 
-        if (this.warpstoneExists(warpstoneSign.destination)) {
-            Warpstone warpstone = this.findWarpstone(warpstoneSign.destination);
+        if (this.warpstoneExists(warpstoneSign.destination,  event.getPlayer().getUniqueId())) {
+            Warpstone warpstone = this.findWarpstone(warpstoneSign.destination,  event.getPlayer().getUniqueId());
             event.line(3, WARPSTONE_LINKED_TEXT);
         } else {
             event.line(3, WARPSTONE_NOT_LINKED_TEXT);
@@ -92,12 +93,13 @@ public class Warpstones extends JavaPlugin implements Listener {
         newWarpstone.x = event.getBlock().getX();
         newWarpstone.y = event.getBlock().getY();
         newWarpstone.z = event.getBlock().getZ();
+        newWarpstone.owner = event.getPlayer().getUniqueId();
 
         this.warpstonesList.add(newWarpstone);
 
         event.getPlayer().sendMessage("Warpstone added");
 
-        List<Warpstone> linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name);
+        List<Warpstone> linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.getPlayer().getUniqueId());
 
         for (Warpstone w : linkedWarpstones) {
             BlockState blockState = event.getBlock().getWorld().getBlockAt(w.x,  w.y, w.z).getState();
@@ -118,17 +120,17 @@ public class Warpstones extends JavaPlugin implements Listener {
         if (state instanceof Sign sign) {
             WarpstoneSign warpstoneSign = new WarpstoneSign(sign);
 
-            if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name)) {
+            if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name,  event.getPlayer().getUniqueId())) {
                 return;
             }
 
-            Warpstone ws = this.findWarpstone(warpstoneSign.name);
+            Warpstone ws = this.findWarpstone(warpstoneSign.name, event.getPlayer().getUniqueId());
 
             this.warpstonesList.remove(ws);
 
             event.getPlayer().sendMessage("Warpstone removed");
 
-            List<Warpstone> linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name);
+            List<Warpstone> linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.getPlayer().getUniqueId());
 
             for (Warpstone w : linkedWarpstones) {
                 BlockState blockState = event.getBlock().getWorld().getBlockAt(w.x,  w.y, w.z).getState();
@@ -156,13 +158,25 @@ public class Warpstones extends JavaPlugin implements Listener {
         if (block.getState() instanceof Sign sign) {
             WarpstoneSign warpstoneSign = new WarpstoneSign(sign);
 
-            if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name)) {
+            if (this.warpstoneExists(warpstoneSign.name) && !this.warpstoneExists(warpstoneSign.name, event.getPlayer().getUniqueId())) {
+                event.getPlayer().sendMessage("Warpstone does not belong to you");
+                event.setCancelled(true);
+                return;
+            }
+
+            if (!this.warpstoneAtLocationBelongsToPlayer(warpstoneSign.name, event.getPlayer().getUniqueId(), event.getClickedBlock().getLocation())) {
+                event.getPlayer().sendMessage("Warpstone does not belong to you");
+                event.setCancelled(true);
+                return;
+            }
+
+            if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name,  event.getPlayer().getUniqueId())) {
                 return;
             }
 
             event.setCancelled(true);
 
-            Warpstone linkedWarpstone = this.findWarpstone(warpstoneSign.destination);
+            Warpstone linkedWarpstone = this.findWarpstone(warpstoneSign.destination,  event.getPlayer().getUniqueId());
 
             if (linkedWarpstone == null) {
                 event.getPlayer().sendMessage("Warpstone is not linked!");
@@ -174,11 +188,11 @@ public class Warpstones extends JavaPlugin implements Listener {
         }
     }
 
-    private List<Warpstone> findLinkedWarpstones(String name) {
+    private List<Warpstone> findLinkedWarpstones(String name, UUID owner) {
         List<Warpstone> warpstones = new ArrayList<>();
 
         for (Warpstone ws : this.warpstonesList) {
-            if (ws.destination.equals(name)) {
+            if (ws.destination.equals(name) && ws.owner.equals(owner)) {
                 warpstones.add(ws);
             }
         }
@@ -186,9 +200,9 @@ public class Warpstones extends JavaPlugin implements Listener {
         return warpstones;
     }
 
-    private Warpstone findWarpstone(String name) {
+    private Warpstone findWarpstone(String name, UUID owner) {
         for (Warpstone ws : this.warpstonesList) {
-            if (ws.name.equals(name)) {
+            if (ws.name.equals(name) && ws.owner.equals(owner)) {
                 return ws;
             }
         }
@@ -196,9 +210,29 @@ public class Warpstones extends JavaPlugin implements Listener {
         return null;
     }
 
+    private boolean warpstoneExists(String name, UUID owner) {
+        for (Warpstone ws : this.warpstonesList) {
+            if (ws.name.equals(name) && ws.owner.equals(owner)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private boolean warpstoneExists(String name) {
         for (Warpstone ws : this.warpstonesList) {
             if (ws.name.equals(name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean warpstoneAtLocationBelongsToPlayer(String name, UUID owner, Location location) {
+        for (Warpstone ws : this.warpstonesList) {
+            if (ws.name.equals(name) && ws.owner.equals(owner) && ws.x == location.getX() && ws.y == location.getY() && ws.z == location.getZ()) {
                 return true;
             }
         }
