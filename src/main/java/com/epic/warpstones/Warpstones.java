@@ -42,8 +42,15 @@ public class Warpstones extends JavaPlugin implements Listener {
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this,this);
 
-        new WarpstoneGuideBook(this);
+        this.loadRecipes();
+        this.initWarpstoneStorage();
+    }
 
+    private void loadRecipes() {
+        new WarpstoneGuideBook(this);
+    }
+
+    private void initWarpstoneStorage() {
         try {
             warpstoneStorage = new FileStorage();
 
