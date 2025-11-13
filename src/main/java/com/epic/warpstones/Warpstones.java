@@ -19,6 +19,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -58,6 +60,13 @@ public class Warpstones extends JavaPlugin implements Listener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        ItemStack book = new com.epic.warpstones.items.WarpstoneGuideBook().book;
+
+        event.getPlayer().getInventory().addItem(book);
     }
 
     @EventHandler
