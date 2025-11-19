@@ -1,6 +1,9 @@
 name: Warpstones
-version: 0.0.1
+version: '0.0.1'
 main: com.epic.warpstones.Warpstones
 description: Warpstones to warp between locations
 author: Epic
 api-version: '1.21.9'
+dependencies:
+  - name: MCKotlin-Paper
+    required: true
