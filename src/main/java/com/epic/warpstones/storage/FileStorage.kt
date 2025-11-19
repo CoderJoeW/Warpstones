@@ -46,9 +46,9 @@ class FileStorage: WarpstoneStorage {
                 val warpstone = Warpstone()
                 val parts = line.split("\\|")
 
-                warpstone.x = Integer.parseInt(parts[0])
-                warpstone.y = Integer.parseInt(parts[1])
-                warpstone.z = Integer.parseInt(parts[2])
+                warpstone.x = parts[0].toDouble()
+                warpstone.y = parts[1].toDouble()
+                warpstone.z = parts[2].toDouble()
                 warpstone.name = parts[3]
                 warpstone.destination = parts[4]
                 warpstone.owner = UUID.fromString(parts[5])
