@@ -36,7 +36,7 @@ class FileStorage: WarpstoneStorage {
         this.databaseAbsolutePath = Paths.get(this.database.absolutePath)
     }
 
-    override fun loadWarpstones(): MutableList<Warpstone> {
+    override fun loadWarpstones(): ArrayList<Warpstone> {
         val warpstones = ArrayList<Warpstone>()
 
         try {
@@ -44,7 +44,7 @@ class FileStorage: WarpstoneStorage {
 
             for (line in lines) {
                 val warpstone = Warpstone()
-                val parts = line.split("\\|")
+                val parts = line.split('|')
 
                 warpstone.x = parts[0].toDouble()
                 warpstone.y = parts[1].toDouble()
@@ -58,10 +58,13 @@ class FileStorage: WarpstoneStorage {
             throw RuntimeException("Could not load warpstones", e)
         }
 
+        println("Loaded ${warpstones.size} warpstones")
+        println(warpstones.toString())
+
         return warpstones
     }
 
-    override fun saveWarpstones(warpstones: MutableList<Warpstone>) {
+    override fun saveWarpstones(warpstones: ArrayList<Warpstone>) {
         try {
             val builder = StringBuilder()
 
