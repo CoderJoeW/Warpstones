@@ -1,15 +1,13 @@
-package com.epic.warpstones.models;
+package com.epic.warpstones.models
 
-import org.bukkit.block.Sign;
+import java.util.UUID
 
-import java.util.UUID;
+class Warpstone {
+    public val x: Int = 0
+    public val y: Int = 0
+    public val z: Int = 0
 
-public class Warpstone {
-    public int x;
-    public int y;
-    public int z;
-
-    public String name;
-    public String destination;
-    public UUID owner;
+    public val name: String = ""
+    public val destination: String = ""
+    public val owner: UUID? = null
 }
