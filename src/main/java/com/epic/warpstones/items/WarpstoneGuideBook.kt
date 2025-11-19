@@ -1,65 +1,66 @@
-package com.epic.warpstones.items;
+package com.epic.warpstones.items
 
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.BookMeta
 
-import java.util.List;
+class WarpstoneGuideBook {
+    public val book: ItemStack
+    public val bookMeta: BookMeta
 
-public class WarpstoneGuideBook {
-    public ItemStack book;
-    private BookMeta bookMeta;
+    init {
+        this.book = ItemStack(Material.WRITTEN_BOOK)
+        this.bookMeta = this.book.itemMeta as BookMeta
 
-    public WarpstoneGuideBook() {
-        this.book = new ItemStack(Material.WRITTEN_BOOK);
-        this.bookMeta = (BookMeta) book.getItemMeta();
+        this.bookMeta.title = "Warpstone Book"
+        this.bookMeta.author = "Epic"
+        this.bookMeta.lore = listOf("Instructions on how to create warpstones!")
 
-        this.bookMeta.setTitle("Warpstone Book");
-        this.bookMeta.setAuthor("Epic");
-        this.bookMeta.setLore(List.of("Instructions on how to create warpstones!"));
-
-        String page1 =
-                "§lWarpstone Guide§r\n" +
-                        "§8--------------------§r\n" +
-                        "\n" +
-                        "Create warpstones with signs.\n" +
-                        "Follow this format:\n" +
-                        "\n" +
-                        "§nLine 1§r: \"Warpstone\"\n" +
-                        "§nLine 2§r: §oYour Warpstone Name§r\n" +
-                        "§nLine 3§r: §oDestination Name§r\n" +
-                        "§nLine 4§r: Status (auto)\n";
-
-        String page2 =
-                "§lDetails§r\n" +
-                        "§8--------------§r\n" +
-                        "\n" +
-                        "Line 2 = this warpstone’s\n" +
-                        "name. Used by other signs\n" +
-                        "to link. Keep it unique.\n" +
-                        "\n" +
-                        "Line 3 = where to travel.\n" +
-                        "Must exactly match that\n" +
-                        "warpstone’s Line 2.\n" +
-                        "\n" +
-                        "Example:\n" +
-                        "  L2: §oTownSquare§r\n" +
-                        "  L3: §oMineEntrance§r\n";
-
-        String page3 =
-                "§lStatus§r\n" +
-                        "§8--------§r\n" +
-                        "\n" +
-                        "Line 4 shows:\n" +
-                        "  • §aLinked§r — names match\n" +
-                        "  • §cNot Linked§r — mismatch\n" +
-                        "\n" +
-                        "Quick checks:\n" +
-                        "• Spelling & case match\n" +
-                        "• No extra spaces\n" +
-                        "• Keep names short\n";
-
-        this.bookMeta.addPage(page1, page2, page3);
-        book.setItemMeta(this.bookMeta);
+        this.bookMeta.addPage(this.page1(), this.page2(), this.page3())
+        this.book.itemMeta = this.bookMeta
     }
+
+    fun page1(): String {
+        return """
+            §lWarpstone Guide§r
+            §8--------------------§r
+            Create warpstones with signs.
+            Follow this format:
+            §nLine 1§r: "Warpstone"
+            §nLine 2§r: §oYour Warpstone Name§r
+            §nLine 3§r: §oDestination Name§r
+            §nLine 4§r: Status (auto)
+        """.trimIndent()
+    }
+
+    fun page2(): String {
+        return """
+            §lDetails§r
+            §8--------------§r
+            Line 2 = this warpstone’s
+            name. Used by other signs
+            to link. Keep it unique.
+            Line 3 = where to travel.
+            Must exactly match that
+            warpstone’s Line 2.
+            Example:
+              L2: §oTownSquare§r
+              L3: §oMineEntrance§r
+        """.trimIndent()
+    }
+
+    fun page3(): String {
+        return """
+            §lStatus§r
+            §8--------§r
+            Line 4 shows:
+              • §aLinked§r — names match
+              • §cNot Linked§r — mismatch
+            Quick checks:
+              • Spelling & case match
+              • No extra spaces
+              • Keep names short
+        """.trimIndent()
+    }
+
 }
