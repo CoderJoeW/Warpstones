@@ -1,42 +1,43 @@
-package com.epic.warpstones.models;
+package com.epic.warpstones.models
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import org.bukkit.block.Sign;
-import org.bukkit.block.sign.Side;
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.format.TextColor
+import org.bukkit.block.Sign
+import org.bukkit.block.sign.Side
 
-import java.util.List;
+class WarpstoneSign {
+    public val title: String
+    public val name: String
+    public val destination: String
 
-public class WarpstoneSign {
-    public String title;
-    public String name;
-    public String destination;
-
-    public WarpstoneSign(Sign sign) {
-        this.title = getContent(sign, 0);
-        this.name = getContent(sign, 1);
-        this.destination = getContent(sign, 2);
+    constructor(sign: Sign) {
+        this.title = this.getContent(sign, 0)
+        this.name = this.getContent(sign, 1)
+        this.destination = this.getContent(sign, 2)
     }
 
-    public WarpstoneSign(List<Component> lines) {
-        this.title = getContent(lines, 0);
-        this.name = getContent(lines, 1);
-        this.destination = getContent(lines, 2);
+    constructor(lines: List<Component>) {
+        this.title = this.getContent(lines, 0)
+        this.name = this.getContent(lines, 1)
+        this.destination = this.getContent(lines, 2)
     }
 
-    public boolean isValidWarpstoneSign() {
+    public fun isValidWarpstoneSign(): Boolean {
         if (this.title.equals("Warpstone")) {
-            return true;
+            return true
         }
 
-        return false;
+        return false
     }
 
-    private String getContent(Sign sign, int index) {
-        return ((TextComponent)sign.getSide(Side.FRONT).lines().get(index)).content();
+    private fun getContent(sign: Sign, index: Int): String {
+        val textComponent = sign.getSide(Side.FRONT).lines()[index] as TextComponent
+        return textComponent.content()
     }
 
-    private String getContent(List<Component> lines, int index) {
-        return ((TextComponent)lines.get(index)).content();
+    private fun getContent(lines: List<Component>, index: Int): String {
+        val textComponent = lines[index] as TextComponent
+        return textComponent.content()
     }
 }
