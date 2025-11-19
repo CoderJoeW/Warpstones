@@ -24,7 +24,7 @@ import java.util.UUID
 const val WARPSTONE_IDENTIFIER = "Warpstone"
 
 class Warpstones: JavaPlugin(), Listener {
-    public val warpstonesList = ArrayList<Warpstone>()
+    public var warpstonesList = ArrayList<Warpstone>()
     public lateinit var warpstoneStorage: WarpstoneStorage
 
     val warpstoneLinkedText = Component
@@ -47,6 +47,7 @@ class Warpstones: JavaPlugin(), Listener {
 
     private fun initWarpstoneStorage() {
         this.warpstoneStorage = FileStorage()
+        this.warpstonesList = this.warpstoneStorage.loadWarpstones()
     }
 
     @EventHandler
