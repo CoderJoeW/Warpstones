@@ -29,9 +29,9 @@ class Warpstones: JavaPlugin(), Listener {
 
     val warpstoneLinkedText = Component
         .text("Linked")
-        .color(TextColor.color(255, 0, 0));
+        .color(TextColor.color(0, 255, 0));
     val warpstoneNotLinkedText = Component
-        .text("Linked")
+        .text("Not Linked")
         .color(TextColor.color(255, 0, 0));
 
     override fun onEnable() {
