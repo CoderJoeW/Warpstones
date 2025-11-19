@@ -4,6 +4,3 @@ main: com.epic.warpstones.Warpstones
 description: Warpstones to warp between locations
 author: Epic
 api-version: '1.21.9'
-dependencies:
-  - name: MCKotlin-Paper
-    required: true
