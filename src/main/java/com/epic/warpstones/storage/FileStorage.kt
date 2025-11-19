@@ -1,94 +1,82 @@
-package com.epic.warpstones.storage;
+package com.epic.warpstones.storage
 
-import com.epic.warpstones.Warpstones;
-import com.epic.warpstones.interfaces.WarpstoneStorage;
-import com.epic.warpstones.models.Warpstone;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.epic.warpstones.Warpstones
+import com.epic.warpstones.interfaces.WarpstoneStorage
+import com.epic.warpstones.models.Warpstone
+import org.bukkit.plugin.java.JavaPlugin
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.util.UUID
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+private const val DATABASE_FILE_NAME = "warpstones.db"
 
-public class FileStorage implements WarpstoneStorage {
-    private JavaPlugin plugin;
-    private File database;
+class FileStorage: WarpstoneStorage {
+    private val plugin: JavaPlugin
+    private val database: File
+    private val databaseAbsolutePath: Path
 
-    private final String DATABASE_FILE_NAME = "warpstones.dat";
+    constructor() {
+        this.plugin = JavaPlugin.getPlugin(Warpstones::class.java)
 
-    public FileStorage() throws IOException {
-        this.plugin = JavaPlugin.getPlugin(Warpstones.class);
-
-        File dataFolder = this.plugin.getDataFolder();
+        val dataFolder = this.plugin.dataFolder
 
         if (!dataFolder.exists()) {
-            dataFolder.mkdirs();
+            dataFolder.mkdirs()
         }
 
-        this.database =  new File(dataFolder, DATABASE_FILE_NAME);
+        this.database = File(dataFolder, DATABASE_FILE_NAME)
 
         if (!this.database.exists()) {
-            this.database.createNewFile();
+            this.database.createNewFile()
         }
+
+        this.databaseAbsolutePath = Paths.get(this.database.absolutePath)
     }
 
-    @Override
-    public List<Warpstone> loadWarpstones() {
-        List<Warpstone> warpstones = new ArrayList<>();
+    override fun loadWarpstones(): MutableList<Warpstone> {
+        val warpstones = ArrayList<Warpstone>()
 
         try {
-            List<String> lines = Files.readAllLines(Paths.get(this.database.getAbsolutePath()));
+            val lines = Files.readAllLines(this.databaseAbsolutePath)
 
-            for (String line : lines) {
-                Warpstone warpstone = new Warpstone();
-                String[] parts = line.split("\\|");
+            for (line in lines) {
+                val warpstone = Warpstone()
+                val parts = line.split("\\|")
 
-                warpstone.setX(Integer.parseInt(parts[0]));
-                warpstone.setY(Integer.parseInt(parts[1]));
-                warpstone.setZ(Integer.parseInt(parts[2]));
-                warpstone.setName(parts[3]);
-                warpstone.setDestination(parts[4]);
-                warpstone.setOwner(UUID.fromString(parts[5]));
-                warpstones.add(warpstone);
+                warpstone.x = Integer.parseInt(parts[0])
+                warpstone.y = Integer.parseInt(parts[1])
+                warpstone.z = Integer.parseInt(parts[2])
+                warpstone.name = parts[3]
+                warpstone.destination = parts[4]
+                warpstone.owner = UUID.fromString(parts[5])
+                warpstones.add(warpstone)
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (e: IOException) {
+            throw RuntimeException("Could not load warpstones", e)
         }
 
-        return warpstones;
+        return warpstones
     }
 
-    @Override
-    public void saveWarpstones(List<Warpstone> warpstones) {
+    override fun saveWarpstones(warpstones: MutableList<Warpstone>) {
         try {
-            StringBuilder builder = new StringBuilder();
+            val builder = StringBuilder()
 
-            for (int i = 0; i < warpstones.size(); i++) {
-                Warpstone warpstone = warpstones.get(i);
-
-                builder.append(warpstone.getX())
-                        .append("|")
-                        .append(warpstone.getY())
-                        .append("|")
-                        .append(warpstone.getZ())
-                        .append("|")
-                        .append(warpstone.getName())
-                        .append("|")
-                        .append(warpstone.getDestination())
-                        .append("|")
-                        .append(warpstone.getOwner().toString());
-
-                if (i + 1 != warpstones.size()) {
-                    builder.append("\n");
-                }
+            for (warpstone in warpstones) {
+                builder.append("$warpstone.x|$warpstone.y|$warpstone.z")
+                builder.append("$warpstone.name|$warpstone.destination|${warpstone.owner.toString()}")
+                builder.append("\n")
             }
 
-            Files.writeString(Paths.get(this.database.getAbsolutePath()), builder.toString());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            builder.trimEnd()
+
+            Files.writeString(this.databaseAbsolutePath, builder.toString())
+        } catch(e: IOException) {
+            throw RuntimeException("Could not save warpstones", e)
         }
     }
+
 }
