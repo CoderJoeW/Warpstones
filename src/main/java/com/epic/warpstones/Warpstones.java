@@ -53,13 +53,9 @@ public class Warpstones extends JavaPlugin implements Listener {
     }
 
     private void initWarpstoneStorage() {
-        try {
-            warpstoneStorage = new FileStorage();
+        warpstoneStorage = new FileStorage();
 
-            warpstonesList = warpstoneStorage.loadWarpstones();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        warpstonesList = warpstoneStorage.loadWarpstones();
     }
 
     @EventHandler
