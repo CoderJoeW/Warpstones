@@ -1,254 +1,243 @@
-package com.epic.warpstones;
+package com.epic.warpstones
 
-import com.epic.warpstones.interfaces.WarpstoneStorage;
-import com.epic.warpstones.models.Warpstone;
-import com.epic.warpstones.models.WarpstoneSign;
-import com.epic.warpstones.recipes.WarpstoneGuideBook;
-import com.epic.warpstones.storage.FileStorage;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Sign;
-import org.bukkit.block.sign.Side;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.epic.warpstones.interfaces.WarpstoneStorage
+import com.epic.warpstones.models.Warpstone
+import com.epic.warpstones.models.WarpstoneSign
+import com.epic.warpstones.recipes.WarpstoneGuideBook
+import com.epic.warpstones.storage.FileStorage
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextColor
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.block.Sign
+import org.bukkit.block.sign.Side
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.block.Action
+import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.SignChangeEvent
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerRespawnEvent
+import org.bukkit.plugin.java.JavaPlugin
+import java.util.UUID
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+const val WARPSTONE_IDENTIFIER = "Warpstone"
 
-public class Warpstones extends JavaPlugin implements Listener {
-    public List<Warpstone> warpstonesList = new ArrayList<>();
-    public WarpstoneStorage warpstoneStorage;
+class Warpstones: JavaPlugin(), Listener {
+    public val warpstonesList = ArrayList<Warpstone>()
+    public lateinit var warpstoneStorage: WarpstoneStorage
 
-    public final String WARPSTONE_IDENTIFIER = "Warpstone";
-    public final Component WARPSTONE_LINKED_TEXT = Component
-            .text("Linked")
-            .color(TextColor.color(0, 255, 0));
-    public final Component WARPSTONE_NOT_LINKED_TEXT = Component
-            .text("Not Linked")
-            .color(TextColor.color(255, 0, 0));
+    val warpstoneLinkedText = Component
+        .text("Linked")
+        .color(TextColor.color(255, 0, 0));
+    val warpstoneNotLinkedText = Component
+        .text("Linked")
+        .color(TextColor.color(255, 0, 0));
 
-    @Override
-    public void onEnable() {
-        Bukkit.getPluginManager().registerEvents(this,this);
+    override fun onEnable() {
+        Bukkit.getPluginManager().registerEvents(this, this)
 
-        this.loadRecipes();
-        this.initWarpstoneStorage();
+        this.loadRecipes()
+        this.initWarpstoneStorage()
     }
 
-    private void loadRecipes() {
-        new WarpstoneGuideBook(this);
+    private fun loadRecipes() {
+        WarpstoneGuideBook(this)
     }
 
-    private void initWarpstoneStorage() {
-        warpstoneStorage = new FileStorage();
-
-        warpstonesList = warpstoneStorage.loadWarpstones();
+    private fun initWarpstoneStorage() {
+        this.warpstoneStorage = FileStorage()
     }
 
     @EventHandler
-    public void onPlayerRespawn(PlayerRespawnEvent event) {
-        ItemStack book = new com.epic.warpstones.items.WarpstoneGuideBook().getBook();
+    public fun onPlayerRespawn(event: PlayerRespawnEvent) {
+        val book = com.epic.warpstones.items.WarpstoneGuideBook().book
 
-        event.getPlayer().getInventory().addItem(book);
+        event.player.inventory.addItem(book)
     }
 
     @EventHandler
-    public void onSignChange(SignChangeEvent event) {
-        WarpstoneSign warpstoneSign = new WarpstoneSign(event.lines());
+    public fun onSignChange(event: SignChangeEvent) {
+        val warpstoneSign = WarpstoneSign(event.lines())
 
         if (!warpstoneSign.title.equals(WARPSTONE_IDENTIFIER)) {
-            return;
+            return
         }
 
         if (warpstoneSign.name.isEmpty()) {
-            event.getPlayer().sendMessage("Warpstones require a name for linking on the second line");
-            event.setCancelled(true);
-            return;
+            event.player.sendMessage("Warpstones require a name for linking on the second line")
+            event.isCancelled = true
+            return
         }
 
         if (warpstoneSign.destination.isEmpty()) {
-            event.getPlayer().sendMessage("Warpstones require a destination for linking on the second line");
-            event.setCancelled(true);
-            return;
+            event.player.sendMessage("Warpstones require a destination for linking on the third line")
+            event.isCancelled = true
+            return
         }
 
-        if (this.findWarpstone(warpstoneSign.name, event.getPlayer().getUniqueId()) != null) {
-            event.getPlayer().sendMessage("Warpstone with name " + warpstoneSign.name + " already exists");
-            event.setCancelled(true);
-            return;
+        if (this.findWarpstone(warpstoneSign.name, event.player.uniqueId) != null) {
+            event.player.sendMessage("Warpstone with name $warpstoneSign.name already exists")
+            event.isCancelled = true
+            return
         }
 
-        Warpstone newWarpstone = new Warpstone();
+        val newWarpstone = Warpstone()
 
-        if (this.warpstoneExists(warpstoneSign.destination,  event.getPlayer().getUniqueId())) {
-            Warpstone warpstone = this.findWarpstone(warpstoneSign.destination,  event.getPlayer().getUniqueId());
-            event.line(3, WARPSTONE_LINKED_TEXT);
+        if (this.warpstoneExists(warpstoneSign.destination, event.player.uniqueId)) {
+            val warpstone = this.findWarpstone(warpstoneSign.destination, event.player.uniqueId)
+            event.line(3, this.warpstoneLinkedText)
         } else {
-            event.line(3, WARPSTONE_NOT_LINKED_TEXT);
+            event.line(3, this.warpstoneNotLinkedText)
         }
 
-        newWarpstone.setName(warpstoneSign.name);
-        newWarpstone.setDestination(warpstoneSign.destination);
-        newWarpstone.setX(event.getBlock().getX());
-        newWarpstone.setY(event.getBlock().getY());
-        newWarpstone.setZ(event.getBlock().getZ());
-        newWarpstone.setOwner(event.getPlayer().getUniqueId());
+        newWarpstone.name = warpstoneSign.name
+        newWarpstone.destination = warpstoneSign.destination
+        newWarpstone.x = event.block.x
+        newWarpstone.y = event.block.y
+        newWarpstone.z = event.block.z
+        newWarpstone.owner = event.player.uniqueId
 
-        this.warpstonesList.add(newWarpstone);
+        this.warpstonesList.add(newWarpstone)
 
-        event.getPlayer().sendMessage("Warpstone added");
+        event.player.sendMessage("Warpstone added")
 
-        List<Warpstone> linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.getPlayer().getUniqueId());
+        val linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.player.uniqueId)
 
-        for (Warpstone w : linkedWarpstones) {
-            BlockState blockState = event.getBlock().getWorld().getBlockAt(w.getX(),  w.getY(), w.getZ()).getState();
+        for (ws in linkedWarpstones) {
+            val linkedSign = event.block.world.getBlockAt(ws.x, ws.y, ws.z).state
 
-            if (blockState instanceof Sign linkedSign) {
-                linkedSign.getSide(Side.FRONT).line(3, WARPSTONE_LINKED_TEXT);
-                linkedSign.update();
+            if (linkedSign is Sign) {
+                linkedSign.getSide(Side.FRONT).line(3, this.warpstoneLinkedText)
+                linkedSign.update()
             }
         }
 
-        this.warpstoneStorage.saveWarpstones(this.warpstonesList);
+        this.warpstoneStorage.saveWarpstones(this.warpstonesList)
     }
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
-        BlockState state = event.getBlock().getState();
+    public fun onBlockBreak(event: BlockBreakEvent) {
+        val sign = event.block.state;
 
-        if (state instanceof Sign sign) {
-            WarpstoneSign warpstoneSign = new WarpstoneSign(sign);
+        if (sign !is Sign) {
+            return
+        }
 
-            if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name,  event.getPlayer().getUniqueId())) {
-                return;
-            }
+        val warpstoneSign = WarpstoneSign(sign);
 
-            Warpstone ws = this.findWarpstone(warpstoneSign.name, event.getPlayer().getUniqueId());
+        if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name, event.player.uniqueId)) {
+            return
+        }
 
-            this.warpstonesList.remove(ws);
+        val warpstone = this.findWarpstone(warpstoneSign.name, event.player.uniqueId)
+        this.warpstonesList.remove(warpstone)
 
-            event.getPlayer().sendMessage("Warpstone removed");
+        event.player.sendMessage("Warpstone removed")
 
-            List<Warpstone> linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.getPlayer().getUniqueId());
+        val linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.player.uniqueId)
+        for (ws in linkedWarpstones) {
+            val linkedSign = event.block.world.getBlockAt(ws.x, ws.y, ws.z).state
 
-            for (Warpstone w : linkedWarpstones) {
-                BlockState blockState = event.getBlock().getWorld().getBlockAt(w.getX(),  w.getY(), w.getZ()).getState();
-
-                if (blockState instanceof Sign linkedSign) {
-                    linkedSign.getSide(Side.FRONT).line(3, WARPSTONE_NOT_LINKED_TEXT);
-                    linkedSign.update();
-                }
+            if (linkedSign is Sign) {
+                linkedSign.getSide(Side.FRONT).line(3, this.warpstoneNotLinkedText)
+                linkedSign.update()
             }
         }
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
-            return;
+    public fun onPlayerInteract(event: PlayerInteractEvent) {
+        if (event.action != Action.RIGHT_CLICK_BLOCK) {
+            return
         }
 
-        Block block = event.getClickedBlock();
+        val block = event.clickedBlock ?: return
 
-        if (block == null) {
-            return;
+        if (block.state !is Sign) {
+            return
         }
 
-        if (block.getState() instanceof Sign sign) {
-            WarpstoneSign warpstoneSign = new WarpstoneSign(sign);
+        val warpstoneSign = WarpstoneSign(block.state as Sign)
 
-            if (this.warpstoneExists(warpstoneSign.name) && !this.warpstoneExists(warpstoneSign.name, event.getPlayer().getUniqueId())) {
-                event.getPlayer().sendMessage("Warpstone does not belong to you");
-                event.setCancelled(true);
-                return;
-            }
-
-            if (!this.warpstoneAtLocationBelongsToPlayer(warpstoneSign.name, event.getPlayer().getUniqueId(), event.getClickedBlock().getLocation())) {
-                event.getPlayer().sendMessage("Warpstone does not belong to you");
-                event.setCancelled(true);
-                return;
-            }
-
-            if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name,  event.getPlayer().getUniqueId())) {
-                return;
-            }
-
-            event.setCancelled(true);
-
-            Warpstone linkedWarpstone = this.findWarpstone(warpstoneSign.destination,  event.getPlayer().getUniqueId());
-
-            if (linkedWarpstone == null) {
-                event.getPlayer().sendMessage("Warpstone is not linked!");
-                return;
-            }
-
-            Location location = new Location(event.getPlayer().getWorld(), linkedWarpstone.getX(), linkedWarpstone.getY(), linkedWarpstone.getZ());
-            event.getPlayer().teleportAsync(location);
+        if (this.warpstoneExists(warpstoneSign.name, event.player.uniqueId)) {
+            event.player.sendMessage("Warpstone does not belong to you")
+            event.isCancelled = true
+            return
         }
+
+        if (!this.warpstoneAtLocationBelongsToPlayer(warpstoneSign.name, event.player.uniqueId, event.clickedBlock!!.location)) {
+            event.player.sendMessage("Warpstone does not belong to you")
+            event.isCancelled = true
+            return
+        }
+
+        if (!warpstoneSign.isValidWarpstoneSign() || !this.warpstoneExists(warpstoneSign.name, event.player.uniqueId)) {
+            return
+        }
+
+        event.isCancelled = true
+
+        val linkedWarpstone = this.findWarpstone(warpstoneSign.name, event.player.uniqueId)
+
+        if (linkedWarpstone == null) {
+            event.player.sendMessage("Warpstone is not linked")
+            return
+        }
+
+        val location = Location(event.player.world, linkedWarpstone.x.toDouble(), linkedWarpstone.y.toDouble(), linkedWarpstone.z.toDouble())
+        event.player.teleportAsync(location)
     }
 
-    private List<Warpstone> findLinkedWarpstones(String name, UUID owner) {
-        List<Warpstone> warpstones = new ArrayList<>();
+    private fun findLinkedWarpstones(name: String, owner: UUID): ArrayList<Warpstone> {
+        var warpstones = ArrayList<Warpstone>()
 
-        for (Warpstone ws : this.warpstonesList) {
-            if (ws.getDestination().equals(name) && ws.getOwner().equals(owner)) {
-                warpstones.add(ws);
+        for (ws in this.warpstonesList) {
+            if (ws.destination.equals(name) && ws.owner!!.equals(owner)) {
+                warpstones.add(ws)
             }
         }
 
-        return warpstones;
+        return warpstones
     }
 
-    private Warpstone findWarpstone(String name, UUID owner) {
-        for (Warpstone ws : this.warpstonesList) {
-            if (ws.getName().equals(name) && ws.getOwner().equals(owner)) {
-                return ws;
+    private fun findWarpstone(name: String, owner: UUID): Warpstone? {
+        for (ws in this.warpstonesList) {
+            if (ws.name.equals(name) && ws.owner!!.equals(owner)) {
+                return ws
             }
         }
 
-        return null;
+        return null
     }
 
-    private boolean warpstoneExists(String name, UUID owner) {
-        for (Warpstone ws : this.warpstonesList) {
-            if (ws.getName().equals(name) && ws.getOwner().equals(owner)) {
-                return true;
+    private fun warpstoneExists(name: String, owner: UUID): Boolean {
+        for (ws in this.warpstonesList) {
+            if (ws.name.equals(name) && ws.owner!!.equals(owner)) {
+                return true
             }
         }
 
-        return false;
+        return false
     }
 
-    private boolean warpstoneExists(String name) {
-        for (Warpstone ws : this.warpstonesList) {
-            if (ws.getName().equals(name)) {
-                return true;
+    private fun warpstoneExists(name: String): Boolean {
+        for (ws in this.warpstonesList) {
+            if (ws.name.equals(name)) {
+                return true
             }
         }
 
-        return false;
+        return false
     }
 
-    private boolean warpstoneAtLocationBelongsToPlayer(String name, UUID owner, Location location) {
-        for (Warpstone ws : this.warpstonesList) {
-            if (ws.getName().equals(name) && ws.getOwner().equals(owner) && ws.getX() == location.getX() && ws.getY() == location.getY() && ws.getZ() == location.getZ()) {
-                return true;
+    private fun warpstoneAtLocationBelongsToPlayer(name: String, owner: UUID, location: Location): Boolean {
+        for (ws in this.warpstonesList) {
+            if (ws.name.equals(name) && ws.owner!!.equals(owner) && ws.x == location.x.toInt() && ws.y == location.y.toInt() && ws.z == location.z.toInt()) {
+                return true
             }
         }
 
-        return false;
+        return false
     }
 }
