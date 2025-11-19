@@ -46,12 +46,12 @@ public class FileStorage implements WarpstoneStorage {
                 Warpstone warpstone = new Warpstone();
                 String[] parts = line.split("\\|");
 
-                warpstone.x = Integer.parseInt(parts[0]);
-                warpstone.y = Integer.parseInt(parts[1]);
-                warpstone.z = Integer.parseInt(parts[2]);
-                warpstone.name = parts[3];
-                warpstone.destination = parts[4];
-                warpstone.owner = UUID.fromString(parts[5]);
+                warpstone.setX(Integer.parseInt(parts[0]));
+                warpstone.setY(Integer.parseInt(parts[1]));
+                warpstone.setZ(Integer.parseInt(parts[2]));
+                warpstone.setName(parts[3]);
+                warpstone.setDestination(parts[4]);
+                warpstone.setOwner(UUID.fromString(parts[5]));
                 warpstones.add(warpstone);
             }
         } catch (IOException e) {
@@ -69,17 +69,17 @@ public class FileStorage implements WarpstoneStorage {
             for (int i = 0; i < warpstones.size(); i++) {
                 Warpstone warpstone = warpstones.get(i);
 
-                builder.append(warpstone.x)
+                builder.append(warpstone.getX())
                         .append("|")
-                        .append(warpstone.y)
+                        .append(warpstone.getY())
                         .append("|")
-                        .append(warpstone.z)
+                        .append(warpstone.getZ())
                         .append("|")
-                        .append(warpstone.name)
+                        .append(warpstone.getName())
                         .append("|")
-                        .append(warpstone.destination)
+                        .append(warpstone.getDestination())
                         .append("|")
-                        .append(warpstone.owner.toString());
+                        .append(warpstone.getOwner().toString());
 
                 if (i + 1 != warpstones.size()) {
                     builder.append("\n");

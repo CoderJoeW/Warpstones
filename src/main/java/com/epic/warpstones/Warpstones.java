@@ -104,12 +104,12 @@ public class Warpstones extends JavaPlugin implements Listener {
             event.line(3, WARPSTONE_NOT_LINKED_TEXT);
         }
 
-        newWarpstone.name = warpstoneSign.name;
-        newWarpstone.destination = warpstoneSign.destination;
-        newWarpstone.x = event.getBlock().getX();
-        newWarpstone.y = event.getBlock().getY();
-        newWarpstone.z = event.getBlock().getZ();
-        newWarpstone.owner = event.getPlayer().getUniqueId();
+        newWarpstone.setName(warpstoneSign.name);
+        newWarpstone.setDestination(warpstoneSign.destination);
+        newWarpstone.setX(event.getBlock().getX());
+        newWarpstone.setY(event.getBlock().getY());
+        newWarpstone.setZ(event.getBlock().getZ());
+        newWarpstone.setOwner(event.getPlayer().getUniqueId());
 
         this.warpstonesList.add(newWarpstone);
 
@@ -118,7 +118,7 @@ public class Warpstones extends JavaPlugin implements Listener {
         List<Warpstone> linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.getPlayer().getUniqueId());
 
         for (Warpstone w : linkedWarpstones) {
-            BlockState blockState = event.getBlock().getWorld().getBlockAt(w.x,  w.y, w.z).getState();
+            BlockState blockState = event.getBlock().getWorld().getBlockAt(w.getX(),  w.getY(), w.getZ()).getState();
 
             if (blockState instanceof Sign linkedSign) {
                 linkedSign.getSide(Side.FRONT).line(3, WARPSTONE_LINKED_TEXT);
@@ -149,7 +149,7 @@ public class Warpstones extends JavaPlugin implements Listener {
             List<Warpstone> linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.getPlayer().getUniqueId());
 
             for (Warpstone w : linkedWarpstones) {
-                BlockState blockState = event.getBlock().getWorld().getBlockAt(w.x,  w.y, w.z).getState();
+                BlockState blockState = event.getBlock().getWorld().getBlockAt(w.getX(),  w.getY(), w.getZ()).getState();
 
                 if (blockState instanceof Sign linkedSign) {
                     linkedSign.getSide(Side.FRONT).line(3, WARPSTONE_NOT_LINKED_TEXT);
@@ -199,7 +199,7 @@ public class Warpstones extends JavaPlugin implements Listener {
                 return;
             }
 
-            Location location = new Location(event.getPlayer().getWorld(), linkedWarpstone.x, linkedWarpstone.y, linkedWarpstone.z);
+            Location location = new Location(event.getPlayer().getWorld(), linkedWarpstone.getX(), linkedWarpstone.getY(), linkedWarpstone.getZ());
             event.getPlayer().teleportAsync(location);
         }
     }
@@ -208,7 +208,7 @@ public class Warpstones extends JavaPlugin implements Listener {
         List<Warpstone> warpstones = new ArrayList<>();
 
         for (Warpstone ws : this.warpstonesList) {
-            if (ws.destination.equals(name) && ws.owner.equals(owner)) {
+            if (ws.getDestination().equals(name) && ws.getOwner().equals(owner)) {
                 warpstones.add(ws);
             }
         }
@@ -218,7 +218,7 @@ public class Warpstones extends JavaPlugin implements Listener {
 
     private Warpstone findWarpstone(String name, UUID owner) {
         for (Warpstone ws : this.warpstonesList) {
-            if (ws.name.equals(name) && ws.owner.equals(owner)) {
+            if (ws.getName().equals(name) && ws.getOwner().equals(owner)) {
                 return ws;
             }
         }
@@ -228,7 +228,7 @@ public class Warpstones extends JavaPlugin implements Listener {
 
     private boolean warpstoneExists(String name, UUID owner) {
         for (Warpstone ws : this.warpstonesList) {
-            if (ws.name.equals(name) && ws.owner.equals(owner)) {
+            if (ws.getName().equals(name) && ws.getOwner().equals(owner)) {
                 return true;
             }
         }
@@ -238,7 +238,7 @@ public class Warpstones extends JavaPlugin implements Listener {
 
     private boolean warpstoneExists(String name) {
         for (Warpstone ws : this.warpstonesList) {
-            if (ws.name.equals(name)) {
+            if (ws.getName().equals(name)) {
                 return true;
             }
         }
@@ -248,7 +248,7 @@ public class Warpstones extends JavaPlugin implements Listener {
 
     private boolean warpstoneAtLocationBelongsToPlayer(String name, UUID owner, Location location) {
         for (Warpstone ws : this.warpstonesList) {
-            if (ws.name.equals(name) && ws.owner.equals(owner) && ws.x == location.getX() && ws.y == location.getY() && ws.z == location.getZ()) {
+            if (ws.getName().equals(name) && ws.getOwner().equals(owner) && ws.getX() == location.getX() && ws.getY() == location.getY() && ws.getZ() == location.getZ()) {
                 return true;
             }
         }
