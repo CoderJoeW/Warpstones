@@ -93,9 +93,9 @@ class Warpstones: JavaPlugin(), Listener {
 
         newWarpstone.name = warpstoneSign.name
         newWarpstone.destination = warpstoneSign.destination
-        newWarpstone.x = event.block.x
-        newWarpstone.y = event.block.y
-        newWarpstone.z = event.block.z
+        newWarpstone.x = event.block.location.x
+        newWarpstone.y = event.block.location.y
+        newWarpstone.z = event.block.location.z
         newWarpstone.owner = event.player.uniqueId
 
         this.warpstonesList.add(newWarpstone)
@@ -105,7 +105,7 @@ class Warpstones: JavaPlugin(), Listener {
         val linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.player.uniqueId)
 
         for (ws in linkedWarpstones) {
-            val linkedSign = event.block.world.getBlockAt(ws.x, ws.y, ws.z).state
+            val linkedSign = event.block.world.getBlockAt(Location(event.block.world, ws.x, ws.y, ws.z)).state
 
             if (linkedSign is Sign) {
                 linkedSign.getSide(Side.FRONT).line(3, this.warpstoneLinkedText)
@@ -137,7 +137,7 @@ class Warpstones: JavaPlugin(), Listener {
 
         val linkedWarpstones = this.findLinkedWarpstones(warpstoneSign.name, event.player.uniqueId)
         for (ws in linkedWarpstones) {
-            val linkedSign = event.block.world.getBlockAt(ws.x, ws.y, ws.z).state
+            val linkedSign = event.block.world.getBlockAt(Location(event.block.world, ws.x, ws.y, ws.z)).state
 
             if (linkedSign is Sign) {
                 linkedSign.getSide(Side.FRONT).line(3, this.warpstoneNotLinkedText)
@@ -160,12 +160,6 @@ class Warpstones: JavaPlugin(), Listener {
 
         val warpstoneSign = WarpstoneSign(block.state as Sign)
 
-        if (this.warpstoneExists(warpstoneSign.name, event.player.uniqueId)) {
-            event.player.sendMessage("Warpstone does not belong to you")
-            event.isCancelled = true
-            return
-        }
-
         if (!this.warpstoneAtLocationBelongsToPlayer(warpstoneSign.name, event.player.uniqueId, event.clickedBlock!!.location)) {
             event.player.sendMessage("Warpstone does not belong to you")
             event.isCancelled = true
@@ -178,14 +172,14 @@ class Warpstones: JavaPlugin(), Listener {
 
         event.isCancelled = true
 
-        val linkedWarpstone = this.findWarpstone(warpstoneSign.name, event.player.uniqueId)
+        val linkedWarpstone = this.findWarpstone(warpstoneSign.destination, event.player.uniqueId)
 
         if (linkedWarpstone == null) {
             event.player.sendMessage("Warpstone is not linked")
             return
         }
 
-        val location = Location(event.player.world, linkedWarpstone.x.toDouble(), linkedWarpstone.y.toDouble(), linkedWarpstone.z.toDouble())
+        val location = Location(event.player.world, linkedWarpstone.x, linkedWarpstone.y, linkedWarpstone.z)
         event.player.teleportAsync(location)
     }
 
@@ -233,7 +227,7 @@ class Warpstones: JavaPlugin(), Listener {
 
     private fun warpstoneAtLocationBelongsToPlayer(name: String, owner: UUID, location: Location): Boolean {
         for (ws in this.warpstonesList) {
-            if (ws.name.equals(name) && ws.owner!!.equals(owner) && ws.x == location.x.toInt() && ws.y == location.y.toInt() && ws.z == location.z.toInt()) {
+            if (ws.name == name && ws.owner == owner && ws.x == location.x && ws.y == location.y && ws.z == location.z) {
                 return true
             }
         }
