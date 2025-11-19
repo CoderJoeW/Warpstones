@@ -6,9 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.meta.BookMeta;
-
-import java.util.List;
 
 public class WarpstoneGuideBook {
     private NamespacedKey recipeKey;
@@ -20,7 +17,7 @@ public class WarpstoneGuideBook {
     }
 
     private void registerCustomBookRecipe() {
-        ItemStack book = new com.epic.warpstones.items.WarpstoneGuideBook().book;
+        ItemStack book = new com.epic.warpstones.items.WarpstoneGuideBook().getBook();
         ShapedRecipe recipe = new ShapedRecipe(this.recipeKey, book);
         recipe.shape("PPP", "PPP", "PPP");
         recipe.setIngredient('P', Material.PAPER);

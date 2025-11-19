@@ -64,7 +64,7 @@ public class Warpstones extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-        ItemStack book = new com.epic.warpstones.items.WarpstoneGuideBook().book;
+        ItemStack book = new com.epic.warpstones.items.WarpstoneGuideBook().getBook();
 
         event.getPlayer().getInventory().addItem(book);
     }
