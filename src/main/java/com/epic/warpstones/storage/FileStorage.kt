@@ -11,7 +11,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.UUID
 
-private const val DATABASE_FILE_NAME = "warpstones.db"
+private const val DATABASE_FILE_NAME = "warpstones.dat"
 
 class FileStorage: WarpstoneStorage {
     private val plugin: JavaPlugin
@@ -66,8 +66,8 @@ class FileStorage: WarpstoneStorage {
             val builder = StringBuilder()
 
             for (warpstone in warpstones) {
-                builder.append("$warpstone.x|$warpstone.y|$warpstone.z")
-                builder.append("$warpstone.name|$warpstone.destination|${warpstone.owner.toString()}")
+                builder.append("${warpstone.x}|${warpstone.y}|${warpstone.z}|")
+                builder.append("${warpstone.name}|${warpstone.destination}|${warpstone.owner.toString()}")
                 builder.append("\n")
             }
 
